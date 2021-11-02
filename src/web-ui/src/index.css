@@ -340,3 +340,8 @@ svg {
 .amplify-auth-container {
   text-align: center;
 }
+
+.image-preview {
+  max-height: 800px;
+  max-width: 800px;
+}

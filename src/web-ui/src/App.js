@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+// import ImageUploader from 'react-images-upload';
+import ReactFileReader from 'react-file-reader';
 import { AmplifyAuthenticator, AmplifySignIn } from "@aws-amplify/ui-react";
 import { onAuthUIStateChange } from "@aws-amplify/ui-components";
 import Webcam from "react-webcam";
@@ -15,6 +17,7 @@ const App = () => {
   const [authState, setAuthState] = useState(undefined);
   const [readyToStream, setReadyToStream] = useState(false);
   const [testResults, setTestResults] = useState([]);
+  const [imageSrc, setImageSrc] = useState(undefined);
   const iterating = useRef(false);
   const webcam = useRef(undefined);
 
@@ -55,6 +58,43 @@ const App = () => {
     } else setTestResults([]);
   };
 
+  const takeScreenshot = () => {
+    const image = webcam.current.getScreenshot();
+    const b64Encoded = image.split(",")[1];
+
+    console.log(b64Encoded);
+
+    gateway.processImage(b64Encoded).then((response) => {
+      if (response) setTestResults(response);
+    });
+  }
+
+  const imageUpload = (picture) => {
+    var reader = new FileReader();
+    reader.readAsDataURL(picture.fileList[0]);
+    reader.onloadend = function (e) {
+      console.log(reader.result);
+      setImageSrc(reader.result);
+    };
+
+    const image = picture.base64[0];
+    const b64Encoded = image.split(",")[1];
+    gateway.processImage(b64Encoded).then((response) => {
+      if (response) setTestResults(response);
+    });
+  }
+
+//   const getBase64 = (file, cb) => {
+//     let reader = new FileReader();
+//     reader.readAsDataURL(file);
+//     reader.onload = function () {
+//         cb(reader.result)
+//     };
+//     reader.onerror = function (error) {
+//         console.log('Error: ', error);
+//     };
+// }
+
   useEffect(() => {
     return onAuthUIStateChange((s) => setAuthState(s));
   }, []);
@@ -68,6 +108,7 @@ const App = () => {
         readyToStream={readyToStream}
         signedIn={signedIn}
         toggleRekognition={toggleRekognition}
+        takeScreenshot={takeScreenshot}
       />
       {signedIn ? (
         <>
@@ -75,7 +116,7 @@ const App = () => {
           <CameraHelp show={!readyToStream} />
           <Row>
             <Col md={8} sm={6}>
-              <Webcam
+              {/* <Webcam
                 ref={setupWebcam}
                 screenshotFormat="image/jpeg"
                 videoConstraints={{
@@ -84,7 +125,18 @@ const App = () => {
                   facingMode: "user",
                 }}
                 style={{ width: "100%", marginTop: "10px" }}
-              />
+              /> */}
+              {/* <ImageUploader
+                withIcon={true}
+                buttonText='Choose images'
+                //onChange={this.onDrop}
+                imgExtension={['.jpg', '.gif', '.png', '.gif']}
+                maxFileSize={5242880}
+              /> */}
+              <img className="image-preview" src={imageSrc} />
+              <ReactFileReader fileTypes={[".jpg",".png"]} base64={true} multipleFiles={true} handleFiles={imageUpload}>
+                <button className='btn'>Upload</button>
+              </ReactFileReader>
             </Col>
             <Col md={4} sm={6}>
               <EngagementSummary testResults={testResults} />

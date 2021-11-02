@@ -6,10 +6,11 @@ import { retryWrapper } from "../utils";
 
 import AddUserModal from "./AddUserModal";
 import RekognitionButton from "./RekognitionButton";
+import ScreenShotButton from "./ScreenShotButton";
 
 import "./Header.css";
 
-const Header = ({ addUser, readyToStream, signedIn, toggleRekognition }) => {
+const Header = ({ addUser, readyToStream, signedIn, toggleRekognition, takeScreenshot }) => {
   const [authError, setAuthError] = useState(null);
   const [userEmail, setUserEmail] = useState(undefined);
 
@@ -46,6 +47,10 @@ const Header = ({ addUser, readyToStream, signedIn, toggleRekognition }) => {
             )}
             {userEmail && (
               <>
+                <ScreenShotButton
+                  onClick={takeScreenshot}
+                  enabled={readyToStream}
+                />
                 <RekognitionButton
                   onClick={toggleRekognition}
                   enabled={readyToStream}
